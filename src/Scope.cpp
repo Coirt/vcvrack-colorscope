@@ -55,7 +55,7 @@ struct Scope : Module {
 	bool lissajous = false;
 	bool external = false;
 	dsp::SchmittTrigger resetTrigger;
-	PortWidget *xPort, *yPort;
+
 
 	Scope() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -156,6 +156,7 @@ struct ScopeDisplay : TransparentWidget {
 	Scope *module;
 	int frame = 0;
 	std::shared_ptr<Font> font;
+	PortWidget *xPort, *yPort;
 
 	struct Stats {
 		float vrms = 0.f, vpp = 0.f, vmin = 0.f, vmax = 0.f;
@@ -273,8 +274,8 @@ struct ScopeDisplay : TransparentWidget {
 		if (!module)
 			return;
 
-		assert(module->xPort);
-		assert(module->yPort);
+		assert(xPort);
+		assert(yPort);
 
 		float gainX = std::pow(2.f, std::round(module->params[Scope::X_SCALE_PARAM].getValue() / 10.f));
 		float gainY = std::pow(2.f, std::round(module->params[Scope::Y_SCALE_PARAM].getValue() / 10.f));
@@ -294,8 +295,8 @@ struct ScopeDisplay : TransparentWidget {
 
 		// Compute colors
 		NVGcolor xColor, yColor;
-		xColor = getPortColor(module->xPort);
-		yColor = getPortColor(module->yPort);
+		xColor = getPortColor(xPort);
+		yColor = getPortColor(yPort);
 		if (memcmp(&xColor, &yColor, sizeof(xColor)) == 0 ) {
 			// if the colors are the same pick novel colors
 			NVGcolor tmp = xColor;
@@ -353,7 +354,7 @@ struct ScopeDisplay : TransparentWidget {
 	}
 
 	NVGcolor getPortColor(PortWidget* port) {
-		CableWidget *cable = APP->scene->rack->/*cableContainer->*/getTopCable(port);
+		CableWidget *cable = APP->scene->rack->getTopCable(port);
 		NVGcolor color = cable ? cable->color : nvgRGBA(0x9f, 0xe4, 0x36, 0xc0);
 		//color.a = 0xc0;
 		return color;
@@ -364,6 +365,7 @@ struct ScopeDisplay : TransparentWidget {
 
 struct ScopeWidget : ModuleWidget {
 	ScopeWidget(Scope *module){
+		//PortWidget *portX, *portY;
 
 		setModule(module);
 		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/colorScope.svg")));
@@ -372,12 +374,21 @@ struct ScopeWidget : ModuleWidget {
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
-		if (module != NULL) {
+
+		PortWidget* portX = createInput<PJ301MPort>(Vec(17, 319), module, Scope::X_INPUT);
+		PortWidget* portY = createInput<PJ301MPort>(Vec(63, 319), module, Scope::Y_INPUT);
+		addInput(portX);
+		addInput(portY);
+
+		{
 			ScopeDisplay *display = new ScopeDisplay();
 			display->module = module;
 			display->box.pos = Vec(0, 44);
 			display->box.size = Vec(box.size.x, 140);
+			display->xPort = portX;
+			display->yPort = portY;
 			addChild(display);
+
 		}
 
 		addParam(createParam<RoundBlackSnapKnob>(Vec(15, 209), module, Scope::X_SCALE_PARAM));
@@ -388,11 +399,6 @@ struct ScopeWidget : ModuleWidget {
 		addParam(createParam<CKD6>(Vec(106, 262), module, Scope::LISSAJOUS_PARAM));
 		addParam(createParam<RoundBlackKnob>(Vec(153, 209), module, Scope::TRIG_PARAM));
 		addParam(createParam<CKD6>(Vec(152, 262), module, Scope::EXTERNAL_PARAM));
-
-		module->xPort = dynamic_cast<PortWidget*>(createInput<PJ301MPort>(Vec(17, 319), module, Scope::X_INPUT));
-		addInput(module->xPort);
-		module->yPort = dynamic_cast<PortWidget*>(createInput<PJ301MPort>(Vec(63, 319), module, Scope::Y_INPUT));
-		addInput(module->yPort);
 
 		addInput(createInput<PJ301MPort>(Vec(154, 319), module, Scope::TRIG_INPUT));
 
