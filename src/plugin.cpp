@@ -1,8 +1,11 @@
 #include "plugin.hpp"
 
 
-Plugin *plugin;
+Plugin *pluginInstance;
 
 void init(rack::Plugin *p) {
+
+	pluginInstance = p;
+
 	p->addModel(modelScope);
 }
