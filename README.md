@@ -1,4 +1,5 @@
-# Colorscope
+# Not yet working
+Colorscope
 
 A Scope plugin for [VCVRack](https://github.com/VCVRack/) where drawing colors follow the wire colors of the inputs. Forked from [Fundamental](https://github.com/VCVRack/Fundamental)'s scope, based on an [unaccepted pull request](https://github.com/VCVRack/Fundamental/pull/34).
 
