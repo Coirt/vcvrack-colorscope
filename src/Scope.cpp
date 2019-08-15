@@ -1,4 +1,5 @@
 #include <string.h>
+/*
 #ifdef PQ_VERSION
 #include "PQ.hpp"
 #include "Common/Branding.hpp"
@@ -6,11 +7,12 @@
 #define LETTER_SPACING -1.25
 #define FONT_SIZE 12
 #else
+*/
 #include "plugin.hpp"
 #define FONT "res/fonts/Sudo.ttf"
 #define LETTER_SPACING -2
 #define FONT_SIZE 13
-#endif
+//#endif
 
 static const int BUFFER_SIZE = 512;
 
@@ -53,7 +55,7 @@ struct Scope : Module {
 	bool lissajous = false;
 	bool external = false;
 	dsp::SchmittTrigger resetTrigger;
-	Port *xPort, *yPort;
+	PortWidget *xPort, *yPort;
 
 	Scope() {
 		config(NUM_PARAMS, NUM_INPUTS, NUM_OUTPUTS, NUM_LIGHTS);
@@ -350,8 +352,8 @@ struct ScopeDisplay : TransparentWidget {
 		drawStats(args, Vec(0, box.size.y - 15), "Y", &statsY, yColor);
 	}
 
-	NVGcolor getPortColor(Port* port) {
-		CableWidget *cable = RackWidget->cableContainer->getTopCable(port);
+	NVGcolor getPortColor(PortWidget* port) {
+		CableWidget *cable = APP->scene->rack->/*cableContainer->*/getTopCable(port);
 		NVGcolor color = cable ? cable->color : nvgRGBA(0x9f, 0xe4, 0x36, 0xc0);
 		//color.a = 0xc0;
 		return color;
@@ -364,14 +366,13 @@ struct ScopeWidget : ModuleWidget {
 	ScopeWidget(Scope *module){
 
 		setModule(module);
-		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/Scope.svg")));
+		setPanel(APP->window->loadSvg(asset::plugin(pluginInstance, "res/colorScope.svg")));
 
 		addChild(createWidget<ScrewSilver>(Vec(15, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 0)));
 		addChild(createWidget<ScrewSilver>(Vec(15, 365)));
 		addChild(createWidget<ScrewSilver>(Vec(box.size.x - 30, 365)));
-
-		{
+		if (module != NULL) {
 			ScopeDisplay *display = new ScopeDisplay();
 			display->module = module;
 			display->box.pos = Vec(0, 44);
@@ -388,9 +389,9 @@ struct ScopeWidget : ModuleWidget {
 		addParam(createParam<RoundBlackKnob>(Vec(153, 209), module, Scope::TRIG_PARAM));
 		addParam(createParam<CKD6>(Vec(152, 262), module, Scope::EXTERNAL_PARAM));
 
-		module->xPort = dynamic_cast<Port*>(createInput<PJ301MPort>(Vec(17, 319), module, Scope::X_INPUT));
+		module->xPort = dynamic_cast<PortWidget*>(createInput<PJ301MPort>(Vec(17, 319), module, Scope::X_INPUT));
 		addInput(module->xPort);
-		module->yPort = dynamic_cast<Port*>(createInput<PJ301MPort>(Vec(63, 319), module, Scope::Y_INPUT));
+		module->yPort = dynamic_cast<PortWidget*>(createInput<PJ301MPort>(Vec(63, 319), module, Scope::Y_INPUT));
 		addInput(module->yPort);
 
 		addInput(createInput<PJ301MPort>(Vec(154, 319), module, Scope::TRIG_INPUT));
@@ -402,8 +403,8 @@ struct ScopeWidget : ModuleWidget {
 	}
 };
 
-#ifdef PQ_VERSION
-Model *modelScope = createModel<Scope, ScopeWidget>("Scope");
-#else
+//#ifdef PQ_VERSION
+//Model *modelScope = createModel<Scope, ScopeWidget>("Scope");
+//#else
 Model *modelScope = createModel<Scope, ScopeWidget>("GenericScope");
-#endif
+//#endif
