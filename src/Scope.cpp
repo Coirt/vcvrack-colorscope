@@ -63,7 +63,7 @@ struct Scope : Module {
 		configParam(X_POS_PARAM, -10.0f, 10.0f, 0.0f);
 		configParam(Y_SCALE_PARAM, -2.0f, 8.0f, 0.0f);
 		configParam(Y_POS_PARAM, -10.0f, 10.0f, 0.0f);
-		configParam(TIME_PARAM, -6.0f, -16.0f, -14.0f);
+		configParam(TIME_PARAM, 6.0f, 16.0f, 14.0f);
 		configParam(LISSAJOUS_PARAM, 0.0f, 1.0f, 0.0f);
 		configParam(TRIG_PARAM, -10.0f, 10.0f, 0.0f);
 		configParam(EXTERNAL_PARAM, 0.0f, 1.0f, 0.0f);
